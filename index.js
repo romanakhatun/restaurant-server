@@ -12,7 +12,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
-  res.send("hello world");
+  res.send("Hello world! <a href='/foods'>Foods</a>");
 });
 
 const uri = `mongodb+srv://restaurant:${process.env.DB_PASS}@cluster0.tfkl8.mongodb.net/foodsStore?retryWrites=true&w=majority`;
@@ -28,7 +28,6 @@ client.connect((err) => {
     const foods = req.body;
     foodsCollection.insertMany(foods, (err, result) => {
       if (err) {
-        console.log(err);
         res.status(500).send({ message: err });
       } else {
         res.send(result.ops[0]);
@@ -40,7 +39,6 @@ client.connect((err) => {
   app.get("/foods", (req, res) => {
     foodsCollection.find({}).toArray((err, documents) => {
       if (err) {
-        console.log(err);
         res.status(500).send({ message: err });
       } else {
         res.send(documents);
@@ -51,7 +49,6 @@ client.connect((err) => {
   app.get("/foods/:key", (req, res) => {
     foodsCollection.find({ key: req.params.key }).toArray((err, documents) => {
       if (err) {
-        console.log(err);
         res.status(500).send({ message: err });
       } else {
         res.send(documents[0]);
@@ -62,4 +59,5 @@ client.connect((err) => {
   console.log(err);
 });
 
-app.listen(process.env.PORT || 5000);
+const LOCAL_PORT = 5000;
+app.listen(process.env.PORT || LOCAL_PORT);
