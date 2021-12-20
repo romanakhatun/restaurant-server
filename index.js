@@ -12,7 +12,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
-  res.send("Hello world! <a href='/foods'>Foods</a>");
+  res.send("Hello world! <a href='/foods'>Foods Data</a>");
 });
 
 const uri = `mongodb+srv://restaurant:${process.env.DB_PASS}@cluster0.tfkl8.mongodb.net/foodsStore?retryWrites=true&w=majority`;
@@ -22,36 +22,62 @@ const client = new MongoClient(uri, {
 });
 client.connect((err) => {
   const foodsCollection = client.db("foodsStore").collection("foods");
-
-  //POST
-  app.post("/addFood", (req, res) => {
-    const foods = req.body;
-    foodsCollection.insertMany(foods, (err, result) => {
-      if (err) {
-        res.status(500).send({ message: err });
-      } else {
-        res.send(result.ops[0]);
-      }
-    });
-  });
+  const ordersCollection = client.db("foodsStore").collection("orders");
 
   //GET
   app.get("/foods", (req, res) => {
-    foodsCollection.find({}).toArray((err, documents) => {
+    foodsCollection.find({}).toArray((err, result) => {
       if (err) {
         res.status(500).send({ message: err });
       } else {
-        res.send(documents);
+        res.send(result);
       }
     });
   });
 
   app.get("/foods/:key", (req, res) => {
-    foodsCollection.find({ key: req.params.key }).toArray((err, documents) => {
+    foodsCollection.find({ key: req.params.key }).toArray((err, result) => {
       if (err) {
         res.status(500).send({ message: err });
       } else {
-        res.send(documents[0]);
+        res.send(result[0]);
+      }
+    });
+  });
+
+  //POST
+  app.post("/addFood", (req, res) => {
+    const foods = req.body;
+    foodsCollection.insertOne(foods, (err, result) => {
+      if (err) {
+        res.status(500).send({ message: err });
+      } else {
+        res.send(result.insertedCount);
+      }
+    });
+  });
+
+  app.post("/getFoodsByKey", (req, res) => {
+    const keys = req.body;
+
+    foodsCollection.find({ key: { $in: keys } }).toArray((err, result) => {
+      if (err) {
+        res.status(500).send({ message: err });
+      } else {
+        res.send(result);
+      }
+    });
+  });
+
+  app.post("/placeOrder", (req, res) => {
+    const orderDetails = req.body;
+    orderDetails.orderTime = new Date();
+
+    ordersCollection.insertOne(orderDetails, (err, result) => {
+      if (err) {
+        res.status(500).send({ message: err });
+      } else {
+        res.send(result.ops[0]);
       }
     });
   });
