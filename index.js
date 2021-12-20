@@ -22,28 +22,40 @@ const client = new MongoClient(uri, {
 });
 client.connect((err) => {
   const foodsCollection = client.db("foodsStore").collection("foods");
-  console.log("database connected");
 
-  // const food = { name: "kanana", price: 25 };
-  // foodsCollection.insertOne(food, (err, res) => {
-  //   if (err) {
-  //     console.log(err);
-  //   } else {
-  //     console.log(res);
-  //   }
-  // });
-
+  //POST
   app.post("/addFood", (req, res) => {
     const foods = req.body;
-    foodsCollection.insertMany(foods).then((result) => {
-      console.log(result.insertedCount);
-      res.send(result.insertedCount);
+    foodsCollection.insertMany(foods, (err, result) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
+        res.send(result.ops[0]);
+      }
     });
   });
 
+  //GET
   app.get("/foods", (req, res) => {
     foodsCollection.find({}).toArray((err, documents) => {
-      res.send(documents);
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
+        res.send(documents);
+      }
+    });
+  });
+
+  app.get("/foods/:key", (req, res) => {
+    foodsCollection.find({ key: req.params.key }).toArray((err, documents) => {
+      if (err) {
+        console.log(err);
+        res.status(500).send({ message: err });
+      } else {
+        res.send(documents[0]);
+      }
     });
   });
 
