@@ -62,7 +62,4 @@ client.connect((err) => {
   console.log(err);
 });
 
-const PORT = 5000;
-app.listen(PORT, () => {
-  console.log(`Running on port ${PORT}`);
-});
+app.listen(5000);
