@@ -59,5 +59,5 @@ client.connect((err) => {
   console.log(err);
 });
 
-const LOCAL_PORT = 5000;
-app.listen(process.env.PORT || LOCAL_PORT);
+const port = process.env.PORT || 5000;
+app.listen(port, () => console.log(`Running on port ${port}`));
